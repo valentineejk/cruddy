@@ -15,9 +15,15 @@ pub mod cruddy {
         Ok(())
     }
     // update
-    pub fn update(ctx: Context<Update>, title: String, message: String) -> Result<()> {
+    pub fn update(ctx: Context<Update>, _title: String, message: String) -> Result<()> {
         let data = &mut ctx.accounts.journal_entry;
         data.message = message;
+        Ok(())
+    }
+
+
+    // delete
+    pub fn delete(_ctx: Context<Delete>, _title: String, _message: String) -> Result<()> {
         Ok(())
     }
 }
@@ -49,6 +55,23 @@ pub struct Update<'info> {
         realloc = 8 + Journal::INIT_SPACE,
         realloc::payer = owner,
         realloc::zero = true
+
+    )]
+    pub journal_entry: Account<'info, Journal>,
+
+    #[account(mut)]
+    pub owner: Signer<'info>,
+    pub system_program: Program<'info, System>
+}
+
+#[derive(Accounts)]
+#[instruction(title: String)]
+pub struct Delete<'info> {
+    #[account(
+        mut,
+        seeds = [title.as_bytes(), owner.key().as_ref()],
+        bump,
+        close = owner,
 
     )]
     pub journal_entry: Account<'info, Journal>,
